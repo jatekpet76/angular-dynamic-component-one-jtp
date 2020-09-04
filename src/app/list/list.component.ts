@@ -5,8 +5,9 @@ import { InfoComponent } from '../info/info.component';
 @Component({
   selector: 'list',
   template: `
+<button (click)="onAddNewItem()">Add New Item</button>
 <ul>
-  <li *ngFor="let item of items">
+  <li *ngFor="let item of items" (click)="onClick($event, item)">
     <ng-template #itemContainer></ng-template>
   </li>
 </ul>
@@ -50,17 +51,35 @@ export class ListComponent implements OnInit, OnChanges {
   }
 
   ngAfterViewInit(): void {
-    this.viewContainerRefs.forEach((viewContainerRef, index) => {
-      console.log('viewContainerRefs', viewContainerRef);
-
-      this.createChildComponent(viewContainerRef, this.items[index]);
-    });
+    this.updateComponents();
 
     this.viewContainerRefs.changes.subscribe((changes: any) => {
       console.log('viewContainerRefs', changes);
+
+      this.updateComponents();
+    });
+  }
+
+  updateComponents() {
+    this.viewContainerRefs.forEach((viewContainerRef, index) => {
+      console.log('viewContainerRefs', viewContainerRef);
+
+      viewContainerRef.clear();
+
+      this.createChildComponent(viewContainerRef, this.items[index]);
     });
   }
 
   ngOnChanges() {
+  }
+
+  onClick(event, item) {
+    console.log('onClick', {event, item});
+
+    this.items = this.items.filter(obj => obj !== item);
+  }
+
+  onAddNewItem() {
+    this.items.push({id: this.items.length+1, name: new Date().toString(), type: 'NEW'});
   }
 }
